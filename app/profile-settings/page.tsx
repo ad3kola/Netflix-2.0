@@ -2,13 +2,10 @@
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { UserCredentialsProps } from "@/utils/typings";
 import Image, { StaticImageData } from "next/image";
-import Link from "next/link";
-import { MouseEventHandler, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { createUserAccount, signOut as signOutOfAccount } from "@/redux/features/UserSlice";
-import { signOut } from "firebase/auth";
-import { auth } from "@/firebase.config";
+import { createUserAccount } from "@/redux/features/UserSlice";
 
 function page() {
   const userInfo: UserCredentialsProps | null =
@@ -33,19 +30,19 @@ function page() {
 
   const makeImageActive = (img: string) => {
     setActiveImage(img);
-    console.log(img)
-    console.log(updatedUserData)
   };
- 
+  const [loading, setLoading] = useState<boolean>(false)
+
   const updatedUserData: UserCredentialsProps = {
     email: userInfo?.email!,
     photoURL: activeImage,
     uid: userInfo?.uid!,
   };
   const redirectToHomePage = () => {
-    console.log(updatedUserData )
+    setLoading(true)
     dispatch(createUserAccount(updatedUserData));
     router.push("/browse");
+    setLoading(false)
   };
   return (
     <div className="w-full h-screen flex items-center justify-center">
@@ -88,18 +85,29 @@ function page() {
           </div>
         )}
         <div
-          className="flex flex-col items-center pb-10"
+          className="flex flex-col items-center pb-10 space-y-2"
           style={{ fontFamily: "Bahnschrift" }}
         >
-          <h2 className = "text-gray-300 font-semibold tracking-wider">
-            {userInfo?.email}
+           <h2 className="text-gray-200 font-bold text-lg uppercase tracking-wider" style={{fontFamily: 'Bahnschrift'}}>
+            {userInfo?.displayName}
           </h2>
+          <h3 className="text-gray-300 font-semibold tracking-wider">
+            {userInfo?.email}
+          </h3>
           <div className="flex mt-4 md:mt-6 items-center space-x-3 justify-center">
             <button
               onClick={redirectToHomePage}
               className="flex items-center justify-center px-4 py-3 text-sm font-semibold tracking-wide text-center text-white bg-[#E41B17] rounded-lg hover:bg-red-600 w-28 whitespace-nowrap cursor-pointer duration-200 transition ease-in"
             >
-              Save
+              {loading ? <div
+                      className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-gray-200 rounded-full "
+                      role="status"
+                      aria-label="loading"
+                    >
+                      <span className="sr-only">
+                        Loading...
+                      </span>
+                    </div> :'Save'}
             </button>
           </div>
         </div>

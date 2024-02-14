@@ -1,4 +1,3 @@
-'use client'
 import Image from "next/image";
 import NetflixBanner from "@/public/assets/netflix-banner-img2.webp";
 import NetflixTextLogo from "@/public/assets/Bg-Transparent Netflix Text Logo.png";
@@ -28,6 +27,7 @@ export default function GetStarted() {
         </div>
         <div className="max-w-6xl h-full mx-auto z-20 w-full flex flex-col ">
           <nav className="w-full flex -mt-4 items-center justify-between">
+              <Link href = {'/'}>
             <div className="relative w-32 md:w-60 h-32">
               <Image
                 src={NetflixTextLogo}
@@ -36,6 +36,7 @@ export default function GetStarted() {
                 className="object-contain filter brightness-[150%]"
               />
             </div>
+              </Link>
             <Link href={"/login"}>
               {" "}
               <button className="text-gray-100 text-sm capitalize rounded-md font-semibold tracking-wide py-2 px-4 bg-[#E41B17]">

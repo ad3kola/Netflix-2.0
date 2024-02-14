@@ -69,6 +69,7 @@ export type NetflixPlans = {
 }
 
 export type UserCredentialsProps = {
+  displayName?: string;
   email: string;
   photoURL: string;
   uid: string;

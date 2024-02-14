@@ -1,4 +1,3 @@
-"use client";
 import { FAQProps } from "@/utils/typings";
 import { useState } from "react";
 import { Disclosure } from "@headlessui/react";

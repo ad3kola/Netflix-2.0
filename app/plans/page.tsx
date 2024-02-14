@@ -7,15 +7,31 @@ import Plan from "@/components/Plan";
 import { useState } from "react";
 import { Tab } from "@headlessui/react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/firebase.config";
+import { signOut } from "firebase/auth";
+import { signOut as signOutOfAccount } from "@/redux/features/UserSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
 
 function page() {
-  const [activeTab, setActiveTab] = useState(chooseNetflixPlan[0].title)
-  
-  const selectActiveTab = (title: string): void => {
-    setActiveTab(title)
-  }
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState(
+    chooseNetflixPlan[0].title
+  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
 
+  const selectActiveTab = (title: string): void => {
+    setActiveTab(title);
+  };
+  const router = useRouter();
+
+  const signOutBtn = () => {
+    setLoading(true);
+    signOut(auth);
+    dispatch(signOutOfAccount());
+    router.push("/");
+    setLoading(false);
+  };
   return (
     <div className="flex flex-col pb-10 w-full">
       <nav className="flex items-center pr-3 -mt-3 md:-mt-5 justify-between border-b-2 border-gray-200 w-full">
@@ -27,7 +43,10 @@ function page() {
             className="object-contain "
           />
         </div>
-        <button className="text-gray-800 text-sm cursor-pointer font-semibold tracking-wider">
+        <button
+          onClick={signOutBtn}
+          className="text-gray-800 text-sm cursor-pointer font-semibold tracking-wider"
+        >
           Sign Out
         </button>
       </nav>
@@ -73,7 +92,12 @@ function page() {
         <div className="hidden lg:flex flex-col mx-auto w-full">
           <div className="flex space-x-3 justify-center w-full">
             {chooseNetflixPlan.map((plan, indx) => (
-              <Plan key={indx} plan={plan} onSelectTab={selectActiveTab} activeTab={activeTab} />
+              <Plan
+                key={indx}
+                plan={plan}
+                onSelectTab={selectActiveTab}
+                activeTab={activeTab}
+              />
             ))}
           </div>
         </div>
@@ -95,8 +119,21 @@ function page() {
         </p>
       </div>
       <div className="px-5 w-full">
-        <button onClick = {() => router.push('/profile-settings')} className="mt-8 w-full mx-auto flex items-center justify-center flex-grow max-w-96 py-5 rounded-sm text-gray-100 text-lg font-bold tracking-wide bg-[#E41B17] hover:opacity-80 duration-200 transition ease-in-out">
-          Next
+        <button
+          onClick={() => router.push("/profile-settings")}
+          className="mt-8 w-full mx-auto flex items-center justify-center flex-grow max-w-96 py-5 rounded-sm text-gray-100 text-lg font-bold tracking-wide bg-[#E41B17] hover:opacity-80 duration-200 transition ease-in-out"
+        >
+          {loading ? (
+            <div
+              className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-gray-200 rounded-full "
+              role="status"
+              aria-label="loading"
+            >
+              <span className="sr-only">Loading...</span>
+            </div>
+          ) : (
+            "Next"
+          )}
         </button>
       </div>
     </div>

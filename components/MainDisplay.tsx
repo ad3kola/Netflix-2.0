@@ -1,33 +1,32 @@
-"use client";
+'use client'
 import React, { useEffect, useState } from "react";
-import Navbar from "./Navbar";
 import fetchFilmsAndTVShows from "@/utils/fetchFilmsAndTVShows";
 import { requests } from "@/utils/TMDBRequests";
 import Image from "next/image";
 import { MovieProps } from "@/utils/typings";
 import { PlayIcon } from "@heroicons/react/24/solid";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import {Toaster} from 'react-hot-toast'
 
 function MainDisplay() {
+   useEffect(() => {
+    const getMovies = async () => {
+      const data = await fetchFilmsAndTVShows(req);
+      const range =
+        Math.floor(Math.random() * (data.length - 0 + 1)) +
+        0;
+      setMovie(data[range]);
+    };
+    getMovies();
+   }, []);
   const [movie, setMovie] = useState<MovieProps | null>(
     null
   );
   const req = requests.allMovies!;
-  useEffect(() => {
-    const getMovies = async () => {
-      const data = await fetchFilmsAndTVShows(req);
-      console.log(data);
-      const range =
-        Math.floor(Math.random() * (data.length - 0 + 1)) +
-        0;
-      console.log(range);
-      setMovie(data[range]);
-    };
-    getMovies();
-  }, []);
-  console.log(movie);
+ 
   return (
     <section className="z-20 relative w-full h-[500px] md:h-[550px] lg:h-[600px] xl:h-[720px]">
+      <Toaster />
       <div className="z-20 absolute top-0 left-0 right-0 bottom-0">
         <Image
           src={

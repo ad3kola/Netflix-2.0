@@ -1,4 +1,3 @@
-"use client";
 function Loading() {
   return (
     <div className="bg-neutral-950 flex space-x-3 items-center justify-center h-screen text-gray-200 w-full">

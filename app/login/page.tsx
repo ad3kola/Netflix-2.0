@@ -12,10 +12,14 @@ import { MouseEvent, useState } from "react";
 import { auth } from "@/firebase.config";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
-import { createUserAccount, signOut } from "@/redux/features/UserSlice";
+import {
+  createUserAccount,
+  signOut,
+} from "@/redux/features/UserSlice";
 import { UserCredentialsProps } from "@/utils/typings";
 import PasswordStrengthBar from "react-password-strength-bar";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 function page() {
   const [userNameInput, setUserNameInput] =
@@ -46,52 +50,144 @@ function page() {
     e: MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
-  console.log('Creating User')
+    const toastId = toast.loading("Creating User Account", {
+      style: {
+        padding: "8px",
+        color: "black",
+        fontWeight: "600",
+      },
+      iconTheme: {
+        primary: "#713200",
+        secondary: "#FFFAEE",
+      },
+    });
     setLoading(true);
-    await createUserWithEmailAndPassword(auth, emailInput, emailPasswordInput)
-        .then((userCredential) => {
-          console.log(userCredential)
-            const user = userCredential?.user;
-            console.log(user);
-            const userDetails: UserCredentialsProps = {
-              email: user?.email ?? ' ',
-              photoURL: '',
-              uid: user?.uid ?? ' ',
-            }
-            console.log(userDetails)
-            dispatch(createUserAccount(userDetails));
-            router.push("/plans");
-        })
-        .catch((error) => {
-            console.log(error.code, error.message);
+    await createUserWithEmailAndPassword(
+      auth,
+      emailInput,
+      emailPasswordInput
+    )
+      .then((userCredential) => {
+        const user = userCredential?.user;
+        
+        const userDetails: UserCredentialsProps = {
+          displayName: userNameInput!,
+          email: user?.email ?? " ",
+          photoURL: "/assets/sonic-avatar.png" ?? "",
+          uid: user?.uid ?? " ",
+        };
+        toast.success("Account Created Successfully", {
+          icon: "😁",
+          id: toastId,
+          style: {
+            padding: "9px",
+            color: "green",
+            fontWeight: "600",
+          },
         });
-        setLoading(false);
-    } 
+        setEmailPasswordInput("");
+        setEmailInput("");
+        setUserNameInput("");
+        dispatch(createUserAccount(userDetails));
+        router.push("/plans");
+      })
+      .catch((error) => {
+        const err = error.code + " " + error.message;
+        toast.error(
+          "Trouble signing in. \n\nThis could be due to: \n\nUnstable network connection, \n\nInvalid credentials, \n\nor using the credentials of an already existing account.",
+          {
+            id: toastId,
+            icon: "🙁",
+            duration: 6000,
+            style: {
+              padding: "8px",
+              color: "red",
+              fontSize: "10px",
+              fontWeight: "500",
+            },
+          }
+        );
+      });
+    setLoading(false);
+  };
   const handleSignIn = async (
     e: MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
-    setLoading(true)
-    await signInWithEmailAndPassword(auth, emailInput, emailPasswordInput)
-    .then((userCredential) => {
+    setLoading(true);
+    const toastId = toast.loading(
+      "Signing In, please wait...",
+      {
+        style: {
+          padding: "8px",
+          color: "black",
+          fontWeight: "600",
+        },
+        iconTheme: {
+          primary: "#713200",
+          secondary: "#FFFAEE",
+        },
+      }
+    );
+    await signInWithEmailAndPassword(
+      auth,
+      emailInput,
+      emailPasswordInput
+    )
+      .then((userCredential) => {
         const user = userCredential?.user;
-        console.log(user);
+        const [username, domain] = user?.email!.split("@");
+        const [firstName, lastName] =
+          username?.split(/[._]/);
+        const formattedName = `${firstName
+          .charAt(0)
+          .toUpperCase()}${firstName.slice(1)} ${lastName
+          .charAt(0)
+          .toUpperCase()}${lastName.slice(1)}`;
         const userDetails: UserCredentialsProps = {
-          email: user?.email ?? ' ',
-          photoURL: '/assets/sonic-avatar.png',
-          uid: user?.uid ?? ' ',
-        }
+          displayName: formattedName ?? '',
+          email: user?.email ?? " ",
+          photoURL: "/assets/sonic-avatar.png",
+          uid: user?.uid ?? " ",
+        };
+        toast.success("Welcome back!!", {
+          id: toastId,
+          duration: 4000,
+          icon: "😁",
+          style: {
+            padding: "9px",
+            color: "green",
+            fontWeight: "600",
+          },
+        });
+        setEmailPasswordInput("");
+        setEmailInput("");
         dispatch(createUserAccount(userDetails));
         router.push("/browse");
-    })
-    .catch((error) => {
-        console.log(error.code, error.message);
-    });
+      })
+      .catch((error) => {
+        const err = error.code + " " + error.message;
+        toast.error(
+          "Trouble signing in. \n\nThis could be due to: \n\nUnstable network connection, \n\nWrong email or password values, or \n\nAccount does not exist.",
+          {
+            id: toastId,
+            icon: "🙁",
+            duration: 6000,
+            style: {
+              padding: "8px",
+              color: "red",
+              fontSize: "10px",
+              fontWeight: "500",
+            },
+          }
+        );
+      });
     setLoading(false);
   };
-  
+
   return (
     <section className="relative w-full min-h-screen bg-black sm:bg-transparent">
+      <Toaster />
       <div className="absolute -z-10 w-full h-full left-0 top-0 right-0 bottom-0">
         <Image
           src={NetflixBanner}
@@ -191,7 +287,6 @@ function page() {
                       <span className="sr-only">
                         Loading...
                       </span>
-                      
                     </div>
                   ) : (
                     "Create Account"
@@ -200,24 +295,22 @@ function page() {
               ) : (
                 <button
                   disabled={
-                    !emailInput ||
-                    !emailPasswordInput
+                    !emailInput || !emailPasswordInput
                   }
                   type="submit"
                   onClick={handleSignIn}
                   className="mt-4 bg-red-600 text-gray-100 text-sm font-semibold tracking-wide hover:bg-red-500 w-full duration-100 p-3 transition ease-in rounded-md"
                 >
                   {loading ? (
-                     <div
-                     className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-gray-200 rounded-full "
-                     role="status"
-                     aria-label="loading"
-                   >
-                     <span className="sr-only">
-                       Loading...
-                     </span>
-                     
-                   </div>
+                    <div
+                      className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-gray-200 rounded-full "
+                      role="status"
+                      aria-label="loading"
+                    >
+                      <span className="sr-only">
+                        Loading...
+                      </span>
+                    </div>
                   ) : (
                     "Sign In"
                   )}

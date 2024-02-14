@@ -6,10 +6,12 @@ async function FeaturedMovies() {
 	const data1 = await fetchFilmsAndTVShows(requests.thriller!)
 	const data2 = await fetchFilmsAndTVShows(requests.animation!)
 	const data3 = await fetchFilmsAndTVShows(requests.scienceFiction!)
-
-	const movie1 = data1[0]
-	const movie2 = data2[0]
-	const movie3 = data3[0]
+	function generateRandomNumber(): number {
+		return Math.floor(Math.random() * 10);
+	  }
+	const movie1 = data1[generateRandomNumber()]
+	const movie2 = data2[generateRandomNumber()]
+	const movie3 = data3[generateRandomNumber()]
 
 	const movies = [movie1, movie2, movie3]
 

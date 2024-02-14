@@ -1,15 +1,6 @@
 "use client";
-import { Popover, Transition } from "@headlessui/react";
-import {
-  ForwardRefExoticComponent,
-  Fragment,
-  SVGProps,
-} from "react";
 import { navLinks } from "@/utils/homepage";
 import {
-  PencilIcon,
-  UserIcon,
-  QuestionMarkCircleIcon,
   BellIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -21,20 +12,31 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { signOut } from "firebase/auth";
-import {signOut as signOutOfAccount} from '@/redux/features/UserSlice'
+import { signOut as signOutOfAccount } from "@/redux/features/UserSlice";
 import { auth } from "@/firebase.config";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
 
 function Navbar() {
+  const generateRandomNumber = (): number => {
+		return Math.floor(Math.random() * 10);
+	  }
   const [scrollY, setScrollY] = useState(0);
   const [navState, setNavState] = useState<boolean>(false);
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const userName = useAppSelector(
+    (state) => state.user.value.userData?.displayName
+  );
+  const userEmail = useAppSelector(
+    (state) => state.user.value.userData?.email
+  );
   const profileImage = useAppSelector(
     (state) => state.user.value.userData?.photoURL
   );
-  const router = useRouter()
-  console.log(profileImage);
-  const dispatch = useDispatch<AppDispatch>()
+
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
@@ -48,16 +50,16 @@ function Navbar() {
   }, []);
 
   const signOutUser = () => {
-    signOut(auth)
-    dispatch(signOutOfAccount())
-    router.push('/')
-  }
+    signOut(auth);
+    dispatch(signOutOfAccount());
+    router.push("/");
+  };
   const [isModalOpen, setIsModalOpen] =
     useState<boolean>(false);
 
   return (
-  <nav
-      className={`z-50 fixed top-0 right-0 left-0 flex items-center justify-between ${
+    <nav
+      className={`z-40 fixed top-0 right-0 left-0 flex items-center justify-between ${
         scrollY >= 100
           ? "bg-neutral-950"
           : "bg-gradient-to-b from-neutral-950"
@@ -137,15 +139,16 @@ function Navbar() {
             9
           </span>
         </div>
-          <Image onClick = {signOutUser}
-            src={profileImage ?  profileImage : "/assets/sonic-avatar.png"}
-            alt="Profile Image"
-            height={35} className ='rounded-full cursor-pointer duration-100 ease-in'
-            width={35}
-          />
+        <Image
+          onClick={signOutUser}
+          src={profileImage ?? "/assets/sonic-avatar.png"}
+          alt="Profile Image"
+          height={35}
+          className="rounded-full cursor-pointer duration-100 ease-in"
+          width={35}
+        />
       </div>
     </nav>
   );
 }
-
-export default Navbar;
+export default Navbar
